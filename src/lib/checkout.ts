@@ -1,7 +1,8 @@
 export async function createCheckoutSession(
   token: string,
   priceId: string,
-  productType: 'royal' | 'imperial'
+  productType: 'royal' | 'imperial',
+  userId: string
 ): Promise<string> {
   const response = await fetch(
     `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-checkout-session`,
@@ -14,6 +15,7 @@ export async function createCheckoutSession(
       body: JSON.stringify({
         priceId,
         productType,
+        userId,
       }),
     }
   );

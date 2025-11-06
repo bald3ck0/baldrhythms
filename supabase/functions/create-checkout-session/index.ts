@@ -34,11 +34,11 @@ Deno.serve(async (req: Request) => {
       apiVersion: "2024-12-18.acacia",
     });
 
-    const { priceId, productType } = await req.json();
+    const { priceId, productType, userId } = await req.json();
 
-    if (!priceId || !productType) {
+    if (!priceId || !productType || !userId) {
       return new Response(
-        JSON.stringify({ error: "Missing priceId or productType" }),
+        JSON.stringify({ error: "Missing priceId, productType, or userId" }),
         {
           status: 400,
           headers: {
@@ -48,6 +48,8 @@ Deno.serve(async (req: Request) => {
         }
       );
     }
+
+    const vaultTier = productType === 'royal' ? 'Royal' : 'Imperial';
 
     const session = await stripe.checkout.sessions.create({
       line_items: [
@@ -60,7 +62,8 @@ Deno.serve(async (req: Request) => {
       success_url: `${req.headers.get("origin")}/success?vault=${productType}`,
       cancel_url: `${req.headers.get("origin")}/cancel`,
       metadata: {
-        productType,
+        user_id: userId,
+        vault_tier: vaultTier,
       },
     });
 

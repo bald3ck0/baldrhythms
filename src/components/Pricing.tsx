@@ -157,13 +157,14 @@ export default function Pricing() {
                     try {
                       setLoading(true);
                       const token = await user?.getToken();
-                      if (!token) throw new Error('No auth token');
+                      if (!token || !user?.id) throw new Error('No auth token or user ID');
 
                       const productType = tier.name === 'Royal Vault' ? 'royal' : 'imperial';
                       const checkoutUrl = await createCheckoutSession(
                         token,
                         tier.priceId,
-                        productType
+                        productType,
+                        user.id
                       );
 
                       window.location.href = checkoutUrl;

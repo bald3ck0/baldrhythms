@@ -35,7 +35,10 @@ export default function ImperialVault() {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ vaultType: 'imperial' }),
+          body: JSON.stringify({
+            vaultType: 'Imperial',
+            userId: user?.id
+          }),
         }
       );
 

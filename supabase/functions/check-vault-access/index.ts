@@ -30,11 +30,11 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const { vaultType } = await req.json();
+    const { vaultType, userId } = await req.json();
 
-    if (!vaultType) {
+    if (!vaultType || !userId) {
       return new Response(
-        JSON.stringify({ error: "Missing vaultType", hasAccess: false }),
+        JSON.stringify({ error: "Missing vaultType or userId", hasAccess: false }),
         {
           status: 400,
           headers: {
@@ -49,47 +49,10 @@ Deno.serve(async (req: Request) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const token = authHeader.replace("Bearer ", "");
-
-    const { data: clerkData, error: clerkError } = await supabase.auth.getUser(token);
-
-    if (clerkError || !clerkData?.user) {
-      return new Response(
-        JSON.stringify({ error: "Invalid token", hasAccess: false }),
-        {
-          status: 401,
-          headers: {
-            ...corsHeaders,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    }
-
-    const clerkId = clerkData.user.id;
-
-    const { data: userData, error: userError } = await supabase
-      .from("users")
-      .select("*")
-      .eq("clerk_id", clerkId)
-      .maybeSingle();
-
-    if (userError || !userData) {
-      return new Response(
-        JSON.stringify({ hasAccess: false }),
-        {
-          headers: {
-            ...corsHeaders,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    }
-
     const { data: accessData, error: accessError } = await supabase
       .from("user_vault_access")
       .select("*")
-      .eq("user_id", userData.id)
+      .eq("user_id", userId)
       .maybeSingle();
 
     if (accessError) {
@@ -105,7 +68,7 @@ Deno.serve(async (req: Request) => {
     }
 
     const hasAccess = accessData?.vault_tier === vaultType ||
-                     (vaultType === "royal" && accessData?.vault_tier === "imperial");
+                     (vaultType === "Royal" && accessData?.vault_tier === "Imperial");
 
     return new Response(
       JSON.stringify({ hasAccess }),

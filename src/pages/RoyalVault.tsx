@@ -35,7 +35,10 @@ export default function RoyalVault() {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ vaultType: 'royal' }),
+          body: JSON.stringify({
+            vaultType: 'Royal',
+            userId: user?.id
+          }),
         }
       );
 
